@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, ChevronRight, Clipboard, Code2, Download, GraduationCap, Lightbulb, Monitor, Play, RotateCcw, Terminal } from "lucide-react";
 
 const progressKey = "r-labs-beginner-progress-v3";
@@ -88,12 +88,33 @@ const lessons = [
     intro:"A plot helps you see patterns, unusual observations and possible relationships before calculating a model.",
     checklist:["Create x and y vectors","Draw a scatterplot","Add a title and axis labels"],
     code:`hours <- c(1, 2, 3, 4, 5)\nscore <- c(52, 61, 69, 78, 86)\nplot(hours, score,\n     main = "Study time and score",\n     xlab = "Study hours",\n     ylab = "Exam score",\n     pch = 19, col = "#287a55")`,
-    output:`A scatterplot with five points showing that higher study time is associated with higher scores.`,
+    output:`A scatterplot with five points showing that higher study time is associated with higher scores.`, visual:"scatter",
     explain:"plot(x, y) places x on the horizontal axis and y on the vertical axis. Labels tell the reader what the values mean.",
     task:"Change one score, run the plot again, and describe how the visual pattern changes.",
     tip:"A visible pattern is useful evidence, but it does not by itself prove causation."
   }
 ];
+
+function PlotOutput(){
+  const canvasRef=useRef(null),wrapRef=useRef(null);
+  useEffect(()=>{
+    const draw=()=>{
+      const canvas=canvasRef.current,wrap=wrapRef.current;if(!canvas||!wrap)return;
+      const width=Math.max(300,wrap.clientWidth),height=300,ratio=Math.min(window.devicePixelRatio||1,2);
+      canvas.width=width*ratio;canvas.height=height*ratio;canvas.style.width=`${width}px`;canvas.style.height=`${height}px`;
+      const c=canvas.getContext("2d");c.scale(ratio,ratio);c.fillStyle="#fff";c.fillRect(0,0,width,height);
+      const p={left:58,right:24,top:42,bottom:54},xs=[1,2,3,4,5],ys=[52,61,69,78,86];
+      const X=x=>p.left+(x-1)/4*(width-p.left-p.right),Y=y=>height-p.bottom-(y-45)/45*(height-p.top-p.bottom);
+      c.strokeStyle="#e0e8e3";c.lineWidth=1;c.font="11px Manrope";c.fillStyle="#6d7d75";
+      [50,60,70,80,90].forEach(v=>{const y=Y(v);c.beginPath();c.moveTo(p.left,y);c.lineTo(width-p.right,y);c.stroke();c.textAlign="right";c.fillText(String(v),p.left-10,y+4)});
+      c.strokeStyle="#29483b";c.lineWidth=1.4;c.beginPath();c.moveTo(p.left,p.top);c.lineTo(p.left,height-p.bottom);c.lineTo(width-p.right,height-p.bottom);c.stroke();
+      xs.forEach((x,i)=>{c.fillStyle="#6d7d75";c.textAlign="center";c.fillText(String(x),X(x),height-p.bottom+20);c.beginPath();c.fillStyle="#287a55";c.arc(X(x),Y(ys[i]),6,0,Math.PI*2);c.fill()});
+      c.fillStyle="#183229";c.font="700 13px Manrope";c.textAlign="center";c.fillText("Study time and score",width/2,21);c.font="11px Manrope";c.fillText("Study hours",(p.left+width-p.right)/2,height-14);c.save();c.translate(16,(p.top+height-p.bottom)/2);c.rotate(-Math.PI/2);c.fillText("Exam score",0,0);c.restore();
+    };
+    draw();const observer=new ResizeObserver(draw);observer.observe(wrapRef.current);return()=>observer.disconnect();
+  },[]);
+  return <div className="plot-output" ref={wrapRef}><canvas ref={canvasRef} role="img" aria-label="Scatterplot of study hours and exam score"/></div>;
+}
 
 export default function RLabsPlatform(){
   const [current,setCurrent]=useState(0);
@@ -115,8 +136,8 @@ export default function RLabsPlatform(){
         <article className="lesson-card">
           <header className="lesson-head"><div className="lesson-icon"><Icon/></div><div><span>STEP {current+1} OF {lessons.length} · {lesson.eyebrow}</span><h2>{lesson.title}</h2><p>{lesson.goal}</p></div></header>
           <section className="lesson-intro"><h3>What you will learn</h3><p>{lesson.intro}</p><div>{lesson.checklist.map(item=><span key={item}><Check/>{item}</span>)}</div>{lesson.links&&<nav>{lesson.links.map(([label,url])=><a key={url} href={url} target="_blank" rel="noreferrer"><Download/>{label}<ArrowRight/></a>)}</nav>}</section>
-          <section className="try-code"><div className="lesson-label"><Terminal/><span><b>01</b> Run this in RStudio</span></div><div className="simple-code"><header><span>first_steps.R</span><button onClick={copy}>{copied?<><Check/>Copied</>:<><Clipboard/>Copy code</>}</button></header><pre><code>{lesson.code}</code></pre></div></section>
-          <section className="read-output"><div className="lesson-label"><Monitor/><span><b>02</b> Check the result</span></div><pre><code>{lesson.output}</code></pre><p>{lesson.explain}</p></section>
+          <section className="try-code"><div className="lesson-label"><Terminal/><span><b>01</b> Run this in R</span></div><div className="simple-code"><header><span>first_steps.R</span><button onClick={copy}>{copied?<><Check/>Copied</>:<><Clipboard/>Copy code</>}</button></header><pre><code>{lesson.code}</code></pre></div></section>
+          <section className="read-output"><div className="lesson-label"><Monitor/><span><b>02</b> Check the result</span></div>{lesson.visual==="scatter"?<><PlotOutput/><div className="output-caption">{lesson.output}</div></>:<pre><code>{lesson.output}</code></pre>}<p>{lesson.explain}</p></section>
           <section className="student-task"><span>YOUR TURN · 5 MINUTES</span><h3>Try it yourself</h3><p>{lesson.task}</p></section>
           <aside className="beginner-tip"><Lightbulb/><p><b>Beginner tip</b>{lesson.tip}</p></aside>
           <footer className="lesson-actions"><button disabled={current===0} onClick={()=>setCurrent(i=>i-1)}><ArrowLeft/>Previous</button><button className={completed.includes(current)?"complete done":"complete"} onClick={toggle}>{completed.includes(current)?<><CheckCircle2/>Step completed</>:<><Check/>Mark as completed</>}</button><button disabled={current===lessons.length-1} onClick={()=>setCurrent(i=>i+1)}>Next<ArrowRight/></button></footer>
