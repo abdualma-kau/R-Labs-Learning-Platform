@@ -164,7 +164,7 @@ export default function RLabsPlatform() {
           <div className="hero-glow"/><div className="hero-copy">
             <span className="eyebrow"><Sparkles/> Learn R by doing</span>
             <h1>Build confidence in R,<br/><em>one lab at a time.</em></h1>
-            <p>Eleven guided labs that connect runnable code, expected output, plain-language interpretation and hands-on practice.</p>
+            <p>Eleven guided university-level labs where students connect runnable code, expected output, statistical interpretation and hands-on practice.</p>
             <div className="hero-actions">
               <button className="primary-action" type="button" onClick={() => openSelected(nextLab < 0 ? 0 : nextLab)}><Play/> {nextLab < 0 ? "Review the course" : `Continue with Lab ${nextLab + 1}`}</button>
               <button className="quiet-action" type="button" onClick={() => document.getElementById("course-labs")?.scrollIntoView({ behavior: "smooth" })}>Browse all labs <ArrowRight/></button>
@@ -179,7 +179,7 @@ export default function RLabsPlatform() {
         </section>
 
         <section className="course-section" id="course-labs">
-          <div className="section-heading"><div><span className="section-kicker">YOUR LEARNING PATH</span><h2>Course labs</h2><p>Open one lab at a time and move from example to independent practice.</p></div><div className="course-count"><b>{labs.length}</b><span>guided labs</span></div></div>
+          <div className="section-heading"><div><span className="section-kicker">YOUR STUDENT LEARNING PATH</span><h2>Course labs</h2><p>Work through one university-level lab at a time and move from guided examples to independent statistical practice.</p></div><div className="course-count"><b>{labs.length}</b><span>guided labs</span></div></div>
           <div className="course-toolbar">
             <label className="search-box"><Search/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search labs, topics or tasks…" aria-label="Search labs"/>{query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X/></button>}</label>
             <div className="filters" aria-label="Filter labs">{[["all","All"],["todo","To do"],["done","Completed"]].map(([value,label])=><button key={value} type="button" className={filter===value?"active":""} onClick={()=>setFilter(value)}>{label}</button>)}</div>
@@ -212,7 +212,7 @@ export default function RLabsPlatform() {
           </div>
         </section>
       </main>
-      <footer className="site-footer"><span className="brand-mark">R</span><p><b>R Labs Learning Platform</b><br/>Practice, understand, progress.</p><span>Built for focused learning</span></footer>
+      <footer className="site-footer"><span className="brand-mark">R</span><p><b>R Labs Learning Platform</b><br/>Practice, understand, progress.</p><span>Built for university students</span></footer>
     </div>
   );
 }
